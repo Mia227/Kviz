@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <title>Dobrodružstvo v Rokforte</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+            background-color: #f0f0f0;
+        }
+        #challenge-container, #completion-container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        #challenge-container {
+            display: none;
+        }
+        #challenge-container.active {
+            display: block;
+        }
+        .option {
+            cursor: pointer;
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+        .option:hover {
+            background-color: #f9f9f9;
+        }
+        .option.correct {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+        .option.incorrect {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+        #message {
+            margin-top: 20px;
+            font-size: 1rem;
+            display: none;
+        }
+        #message.success {
+            color: #155724;
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        #message.error {
+            color: #721c24;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        #continue-button {
+            display: none;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #completion-container {
+            text-align: center;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Dobrodružstvo v Rokforte</h1>
+    <div id="challenge-container">
+        <h2 id="challenge-title"></h2>
+        <p id="challenge-description"></p>
+        <div id="options-container"></div>
+        <div id="message"></div>
+        <button id="continue-button">Pokračovať</button>
+    </div>
+
+    <div id="completion-container">
+        <h2>Gratulujeme!</h2>
+        <p>Splnili ste všetky výzvy!</p>
+    </div>
+
+    <script>
+       const challenges = [
+    {
+        id: 1,
+        title: "Prvá výzva -- Elixíry",
+        description: "Hermiona potrebuje správne namiešať tajný elixír, aby sa dostala cez tajné dvere. Na stole je pri každej ingrediencii poznačená jej hmotnosť. Ingrediencie musí použiť celé. Vie, že hmotnosť výsledného elixíru má byť 4 g. Ktorú ingredienciu nesmie použiť?",
+        options: [
+            { text: "Dračia šupina prášok: 0,5 g", correct: false },
+            { text: "Vlasy jednorožca: 1,25 g", correct: false },
+            { text: "Koreň mandragory: 0,75 g", correct: false },
+            { text: "Gillyweed: 2,0 g", correct: true }
+        ]
+    },
+    {
+        id: 2,
+        title: "Druhá výzva -- Knižnica",
+        description: "Harry našiel starobylú knihu plnú mágií. Pomôž mu vybrať tlačidlo, ktoré nepatrí žiadnemu zaklínadlu.",
+        options: [
+            { text: "Zaklínadlo 1: 0,25 + 1,5 = 1,75", correct: false },
+            { text: "Zaklínadlo 2: 3,75 - 2,25 = 1,5", correct: false },
+            { text: "Zaklínadlo 3: 0,5 x 4,5 = 2,25", correct: false },
+            { text: "Zaklínadlo 4: 6,0 : 2,0 = 3", correct: true }
+        ]
+    },
+    {
+        id: 3,
+        title: "Tretia výzva -- Metlobal",
+        description: "Quaffle – červená lopta je blízko troch triafačov. Ktorý z nich sa k nej dostane prvý? Pri každom hráčovi je uvedená vzdialenosť a rýchlosť.",
+        options: [
+            { text: "Ron Weasley: Vzdialenosť: 2 m, Rýchlosť: 4 m/s", correct: false },
+            { text: "Katie Bell: Vzdialenosť: 3 m, Rýchlosť: 3 m/s", correct: false },
+            { text: "Alicia Spinnet: Vzdialenosť: 1,5 m, Rýchlosť: 2 m/s", correct: true }
+        ]
+    },
+    {
+        id: 4,
+        title: "Štvrtá výzva -- Zakázaný les",
+        description: "Harry a Hagrid sa vybrali do Zakázaného lesa. Pomôžte im vypočítať plochu lesa, ktorý je v tvare obdĺžnika. Dĺžky strán sú uvedené v kilometroch.",
+        options: [
+            { text: "7,25 km²", correct: false },
+            { text: "10,875 km²", correct: true },
+            { text: "13,8 km²", correct: false },
+            { text: "3,75 km²", correct: false }
+        ]
+    },
+    {
+        id: 5,
+        title: "Piata výzva -- Tajné chodby",
+        description: "Harry a jeho priatelia našli tri tajné chodby. Chodby majú priemernú dĺžku 875 m. Koľko meria štvrtá chodba, ak sú známe dĺžky ostatných troch?",
+        options: [
+            { text: "150 m", correct: false },
+            { text: "1,1 km", correct: true },
+            { text: "100 m", correct: false },
+            { text: "1 km", correct: false }
+        ]
+    },
+    {
+        id: 6,
+        title: "Šiesta výzva -- Čarovanie",
+        description: "Harry potrebuje použiť kúzla, aby sa dostal cez ďalšiu prekážku. Pomôžte mu nájsť chybné kúzlo, ktoré nesmie použiť.",
+        options: [
+            { text: "100 : 0,1 = 1000", correct: false },
+            { text: "5,4 : 0,09 = 6", correct: true },
+            { text: "3,6 : 6 = 0,6", correct: false },
+            { text: "21 : 0,03 = 700", correct: false }
+        ]
+    },
+    {
+        id: 7,
+        title: "Siedma výzva -- Tajné dvere",
+        description: "Harry a jeho priatelia našli tajné dvere, ktoré vedú k pokladu. Pomôžte im rozlúštiť hádanku a nájsť správny kľúč – číslo s najväčším počtom desatinných miest.",
+        options: [
+            { text: "1,69 : 13 = 0,13", correct: false },
+            { text: "10 : 3 = 3,333...", correct: true },
+            { text: "0,144 : 12 = 0,012", correct: false }
+        ]
+    }
+];
+
+
+        class HarryPotterGame {
+            constructor() {
+                this.currentChallengeIndex = 0;
+                this.initGame();
+            }
+
+            initGame() {
+                this.renderChallenge();
+                document.getElementById('continue-button').addEventListener('click', this.proceedToNextChallenge.bind(this));
+            }
+
+            renderChallenge() {
+                const challenge = challenges[this.currentChallengeIndex];
+                const challengeContainer = document.getElementById('challenge-container');
+                const optionsContainer = document.getElementById('options-container');
+                const message = document.getElementById('message');
+                const continueButton = document.getElementById('continue-button');
+
+                document.getElementById('challenge-title').textContent = challenge.title;
+                document.getElementById('challenge-description').textContent = challenge.description;
+
+                optionsContainer.innerHTML = '';
+                message.style.display = 'none';
+                message.className = '';
+                message.textContent = '';
+                continueButton.style.display = 'none';
+
+                this.shuffleOptions(challenge.options).forEach(option => {
+                    const optionElement = document.createElement('div');
+                    optionElement.className = 'option';
+                    optionElement.textContent = option.text;
+                    optionElement.dataset.correct = option.correct;
+                    optionsContainer.appendChild(optionElement);
+                });
+
+                challengeContainer.classList.add('active');
+                optionsContainer.addEventListener('click', this.handleOptionClick.bind(this));
+            }
+
+            shuffleOptions(options) {
+                return [...options].sort(() => Math.random() - 0.5);
+            }
+
+            handleOptionClick(event) {
+                const optionElement = event.target.closest('.option');
+                if (!optionElement) return;
+
+                const isCorrect = optionElement.dataset.correct === "true";
+                const message = document.getElementById('message');
+
+                if (isCorrect) {
+                    optionElement.classList.add('correct');
+                    message.className = 'success';
+                    message.textContent = 'Správne! Môžete pokračovať.';
+                    message.style.display = 'block';
+                    document.getElementById('continue-button').style.display = 'block';
+                } else {
+                    optionElement.classList.add('incorrect');
+                    message.className = 'error';
+                    message.textContent = 'Nesprávne! Skúste znova.';
+                    message.style.display = 'block';
+                }
+            }
+
+            proceedToNextChallenge() {
+                this.currentChallengeIndex++;
+                const challengeContainer = document.getElementById('challenge-container');
+                const completionContainer = document.getElementById('completion-container');
+
+                if (this.currentChallengeIndex < challenges.length) {
+                    this.renderChallenge();
+                } else {
+                    challengeContainer.classList.remove('active');
+                    completionContainer.style.display = 'block';
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => new HarryPotterGame());
+    </script>
+</body>
+</html>
